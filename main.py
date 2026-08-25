@@ -1,7 +1,6 @@
 import json
 import threading
 import time
-import webbrowser
 import os
 import hashlib
 import hmac
@@ -56,12 +55,13 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 app = FastAPI(title="LeakX API", version="10.1")
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 SESSION_SECRET = os.getenv("LEAKX_SESSION_SECRET", "leakx-demo-change-this-secret")
+SESSION_HTTPS_ONLY = os.getenv("LEAKX_SESSION_HTTPS_ONLY", "false").lower() == "true"
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
     session_cookie="leakx_session",
     same_site="lax",
-    https_only=False,
+    https_only=SESSION_HTTPS_ONLY,
 )
 
 app.add_middleware(
@@ -222,7 +222,6 @@ def startup():
         append_tick(timestamp, readings)
 
     threading.Thread(target=simulator_thread, daemon=True).start()
-    threading.Timer(1.5, lambda: webbrowser.open("http://127.0.0.1:8000")).start()
 
 
 @app.get("/valve")

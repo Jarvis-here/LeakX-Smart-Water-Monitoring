@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: leakx-smart-water-monitoring
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LEAKX_SESSION_SECRET
+        generateValue: true
+      - key: LEAKX_SESSION_HTTPS_ONLY
+        value: "true"
