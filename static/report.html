@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeakX — Report a Leak</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',system-ui,sans-serif;background:#f4f7f3;color:#172019;min-height:100vh}
+nav{display:flex;justify-content:space-between;align-items:center;padding:16px 6%;background:#102016;color:#fff}
+.logo{font-weight:900;font-size:24px;letter-spacing:2px}.logo span{color:#72b77b}nav a{color:#c8d5ca;text-decoration:none;margin-left:20px;font-size:14px}
+main{max-width:760px;margin:45px auto;padding:0 20px}.kicker{color:#3c7f48;font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:800}
+h1{font-size:42px;margin:10px 0}.intro{color:#68756b;line-height:1.6;margin-bottom:25px}
+form{background:#fff;border:1px solid #dce4dd;border-radius:16px;padding:25px;box-shadow:0 8px 30px rgba(20,40,25,.06)}
+label{display:block;font-size:14px;font-weight:750;margin:16px 0 7px}
+input,textarea{width:100%;border:1px solid #ccd7ce;border-radius:9px;padding:12px;font:inherit;background:#fbfcfb}
+textarea{min-height:110px;resize:vertical}
+.photo{border:2px dashed #b9c9bc;border-radius:12px;padding:18px;background:#f7faf7}
+.preview{display:none;max-width:100%;max-height:260px;margin-top:12px;border-radius:9px}.map-wrap{border:1px solid #ccd7ce;border-radius:12px;overflow:hidden;background:#eef3ef}.map-head{padding:11px 13px;background:#f7faf7;color:#506057;font-size:12px;font-weight:700}.map{height:310px}.zone-note{font-size:11px;color:#728077;margin-top:7px}
+button{width:100%;margin-top:20px;padding:14px;border:0;border-radius:9px;background:#3f8c4b;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+button:disabled{opacity:.55}.note{font-size:12px;color:#7b877e;margin-top:9px}.result{display:none;margin-top:18px;padding:15px;border-radius:10px;background:#e5f3e7;color:#245b2c}.error{background:#fae8e5;color:#8c3227}
+@media(max-width:600px){h1{font-size:34px}nav{align-items:flex-start;gap:10px;flex-direction:column}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav><div class="logo">LEAK<span>X</span></div><div><a href="/">Home</a><a href="#" id="logout">Log out</a></div></nav>
+<main>
+<div class="kicker">Quick community report</div>
+<h1>See a leak? Report it in under a minute.</h1>
+<p class="intro">You don't need sensor knowledge. Take a photo, tell us where the leak is, and add a short description. The report will be sent to the LeakX monitoring dashboard.</p>
+<form id="reportForm">
+<label for="name">Your name (optional)</label>
+<input id="name" name="name" placeholder="e.g. Rahul">
+
+<label for="contact">Phone or email (optional)</label>
+<input id="contact" name="contact" placeholder="Only if you want someone to contact you">
+
+<label for="location">Where is the leak? *</label>
+<input id="location" name="location" required placeholder="e.g. Near Main Gate, Sector 4">
+
+<label>Select the zone on the live map *</label>
+<div class="map-wrap"><div class="map-head">Tap a zone marker to select it for your report</div><div id="consumerMap" class="map"></div></div>
+<div id="zoneNote" class="zone-note">Loading live zone status…</div>
+<input type="hidden" id="zone" name="zone" required>
+
+<label for="description">What did you notice?</label>
+<textarea id="description" name="description" placeholder="Water flowing from a broken pipe near the road..."></textarea>
+
+<label>Photo of the leak</label>
+<div class="photo">
+  <input id="photo" name="photo" type="file" accept="image/*" capture="environment">
+  <img id="preview" class="preview" alt="Selected leak photo">
+  <div class="note">On a phone, this can open the camera. A photo is optional for now.</div>
+</div>
+
+<button id="submitBtn" type="submit">Submit Leak Report</button>
+<div id="result" class="result"></div>
+</form>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.getElementById("logout").addEventListener("click",async e=>{e.preventDefault();await fetch("/logout",{method:"POST"});location.href="/"});
+
+const map=L.map('consumerMap').setView([28.6139,77.2090],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);const zoneMarkers={};
+function markerColor(status){return status==='CRITICAL'?'#c0392b':status==='WARNING'?'#d39a2e':'#3f8c4b'}
+function selectZone(zone){document.getElementById('zone').value=zone.zone;document.getElementById('location').value=zone.zone;document.getElementById('zoneNote').textContent=`Selected: ${zone.zone} · ${zone.status} · ${zone.flow} L/min`;Object.values(zoneMarkers).forEach(m=>m.setZIndexOffset(0));if(zoneMarkers[zone.zone])zoneMarkers[zone.zone].setZIndexOffset(1000)}
+async function loadZoneMap(){try{const r=await fetch('/public/zones');const d=await r.json();const bounds=[];d.zones.forEach(z=>{bounds.push([z.lat,z.lng]);const html=`<b>${z.zone}</b><br>Status: ${z.status}<br>Flow: ${z.flow} L/min<br><button type="button" style="margin-top:7px;padding:7px 10px;border:1px solid #3f8c4b;background:#3f8c4b;color:#fff;border-radius:6px;cursor:pointer" onclick='selectZone(${JSON.stringify(z)})'>Report here</button>`;if(zoneMarkers[z.zone])zoneMarkers[z.zone].setLatLng([z.lat,z.lng]).setPopupContent(html);else zoneMarkers[z.zone]=L.circleMarker([z.lat,z.lng],{radius:11,color:markerColor(z.status),fillColor:markerColor(z.status),fillOpacity:.8,weight:3}).addTo(map).bindPopup(html).on('click',()=>selectZone(z));});if(bounds.length)map.fitBounds(bounds,{padding:[25,25]});document.getElementById('zoneNote').textContent=d.map_note||'Live zone status loaded.'}catch(e){document.getElementById('zoneNote').textContent='Map status unavailable. You can still enter a location manually.'}}
+loadZoneMap();setInterval(loadZoneMap,5000);
+const form=document.getElementById("reportForm"), photo=document.getElementById("photo"), preview=document.getElementById("preview"), result=document.getElementById("result"), btn=document.getElementById("submitBtn");
+photo.addEventListener("change",()=>{const f=photo.files[0];if(!f){preview.style.display="none";return} preview.src=URL.createObjectURL(f);preview.style.display="block";});
+form.addEventListener("submit",async e=>{
+ e.preventDefault(); btn.disabled=true; btn.textContent="Submitting…"; result.style.display="none";
+ try{
+   const fd=new FormData(form);
+   const r=await fetch("/api/leak-reports",{method:"POST",body:fd});
+   const data=await r.json();
+   if(!r.ok) throw new Error(data.detail||"Could not submit the report.");
+   result.className="result"; result.innerHTML="<b>Report submitted.</b><br>Thank you — the LeakX dashboard has received it.";
+   result.style.display="block"; form.reset(); preview.style.display="none";
+ }catch(err){result.className="result error";result.textContent=err.message;result.style.display="block";}
+ finally{btn.disabled=false;btn.textContent="Submit Leak Report";}
+});
+</script>
+</body>
+</html>

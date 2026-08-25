@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeakX — Sign In</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',system-ui,sans-serif;background:#0d110f;color:#edf2ee;min-height:100vh}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 6%;border-bottom:1px solid #29302c;background:#111512}
+.logo{font-weight:900;font-size:25px;letter-spacing:2px}.logo span{color:#62a66e}
+.nav-status{font-size:11px;color:#72b77b;border:1px solid #38523e;padding:7px 10px;text-transform:uppercase;letter-spacing:1px}
+.main{min-height:calc(100vh - 72px);display:grid;grid-template-columns:1.15fr .85fr;gap:70px;max-width:1120px;margin:auto;padding:70px 6%;align-items:center}
+.kicker{color:#76b77f;text-transform:uppercase;letter-spacing:3px;font-size:11px;font-weight:800;margin-bottom:17px}
+h1{font-size:clamp(44px,6vw,72px);line-height:.96;letter-spacing:-3px;margin-bottom:23px}
+.copy{font-size:17px;line-height:1.65;color:#aeb8b0;max-width:620px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:35px;max-width:650px}
+.feature{border:1px solid #29302c;background:#131815;padding:16px}.feature b{display:block;font-size:12px;margin-bottom:7px}.feature span{font-size:11px;color:#818c84;line-height:1.45}
+.login-card{background:#151a17;border:1px solid #364039;padding:30px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.login-card h2{font-size:25px;margin-bottom:7px}.login-card>p{font-size:13px;color:#89958d;margin-bottom:22px}
+label{display:block;font-size:12px;font-weight:750;margin:15px 0 7px;color:#cbd4ce}
+input{width:100%;padding:12px 13px;background:#0e1210;color:#edf2ee;border:1px solid #3a463e;border-radius:6px;font:inherit;outline:none}
+input:focus{border-color:#62a66e}
+button{width:100%;margin-top:21px;padding:13px;border:1px solid #62a66e;border-radius:6px;background:#62a66e;color:#0b120d;font-weight:850;cursor:pointer}
+button:disabled{opacity:.55}.error{display:none;margin-top:13px;padding:10px;background:#321c18;border:1px solid #753d32;color:#e7a294;font-size:12px}
+.demo{margin-top:20px;padding:12px;border:1px solid #29332d;background:#101411;font-family:monospace;font-size:10px;line-height:1.7;color:#89958d}.demo b{color:#cbd4ce}
+.footer{position:fixed;bottom:12px;left:0;right:0;text-align:center;color:#58635c;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+@media(max-width:850px){.main{grid-template-columns:1fr;padding-top:45px;gap:35px}.features{grid-template-columns:1fr 1fr}.footer{position:static;padding:15px}}
+@media(max-width:520px){.features{grid-template-columns:1fr}nav{padding:15px 5%}.main{padding:40px 5%}h1{letter-spacing:-2px}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav><div class="logo">LEAK<span>X</span></div><div class="nav-status">Secure access</div></nav>
+<main class="main">
+<section>
+  <div class="kicker">Smart water monitoring platform</div>
+  <h1>Protect every drop.</h1>
+  <p class="copy">LeakX connects live pipeline monitoring with community leak reporting. Sign in to continue — customers can report leaks, while admins can monitor incidents and control valves.</p>
+  <div class="features">
+    <div class="feature"><b>Customer</b><span>Report a visible leak with a photo and location.</span></div>
+    <div class="feature"><b>Admin</b><span>Monitor zones, alerts, water loss and reports.</span></div>
+    <div class="feature"><b>Respond</b><span>Isolate a leak by controlling the simulated valve.</span></div>
+  </div>
+</section>
+<section class="login-card">
+  <div class="kicker">LeakX access</div>
+  <h2>Sign in</h2>
+  <p>Choose your account role through your credentials.</p>
+  <form id="loginForm">
+    <label for="username">Username</label>
+    <input id="username" name="username" autocomplete="username" required placeholder="Enter username">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Enter password">
+    <button id="btn" type="submit">Sign in to LeakX</button>
+    <div id="error" class="error"></div>
+  </form>
+  <div class="demo"><b>Hackathon demo accounts</b><br>Admin: admin / admin123<br>Customer: customer / customer123</div>
+</section>
+</main>
+<div class="footer">LeakX · Smart Water Monitoring · Role-Based Access</div>
+<script>
+const f=document.getElementById('loginForm'),b=document.getElementById('btn'),e=document.getElementById('error');
+f.addEventListener('submit',async ev=>{ev.preventDefault();b.disabled=true;b.textContent='Signing in…';e.style.display='none';try{const r=await fetch('/login',{method:'POST',body:new FormData(f)});const d=await r.json();if(!r.ok)throw new Error(d.detail||'Login failed');location.href=d.redirect}catch(x){e.textContent=x.message;e.style.display='block'}finally{b.disabled=false;b.textContent='Sign in to LeakX'}});
+</script>
+</body>
+</html>

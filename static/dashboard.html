@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeakX — Admin Control Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}:root{--bg:#111315;--panel:#1a1d20;--alt:#212529;--border:#34383d;--strong:#50555c;--text:#e3e6e9;--muted:#8a9097;--green:#63a06c;--amber:#c99a4a;--red:#ba513c;--copper:#c17d4a;--mono:'IBM Plex Mono',monospace;--disp:'Big Shoulders Display',sans-serif}body{font-family:'Roboto',sans-serif;background:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px) 0 0/100% 28px,var(--bg);color:var(--text);padding:18px 24px 35px;min-height:100vh}.site-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 15px;background:var(--panel);border:1px solid var(--border);margin-bottom:12px}.logo{font-family:var(--disp);font-size:25px;font-weight:900;letter-spacing:1px}.logo span{color:var(--copper)}.nav-right{display:flex;align-items:center;gap:12px}.role{font:600 10px var(--mono);color:var(--green);border:1px solid #426c4a;padding:6px 9px}.logout{color:var(--muted);text-decoration:none;font-size:11px;text-transform:uppercase}.nameplate{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--border);padding:13px 16px;margin-bottom:12px}.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.brand-mark{font:900 25px var(--disp);letter-spacing:1px}.brand-mark span{color:var(--copper)}.brand-sub{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}.controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.zsel,.ctrl-btn,.switch{font:600 10px 'Roboto';letter-spacing:.5px;text-transform:uppercase;padding:7px 10px;background:var(--alt);color:var(--text);border:1px solid var(--strong);cursor:pointer}.switch.open{color:var(--green);border-color:var(--green)}.switch.closed{color:var(--amber);border-color:var(--amber)}.ctrl-btn:hover{border-color:var(--copper)}.status-lamp{font:600 10px var(--mono);padding:6px 9px;border:1px solid var(--strong)}.status-lamp.online{color:var(--green)}.status-lamp.offline{color:var(--red)}.clock{font:11px var(--mono);color:var(--muted)}
+.tabs{display:flex;gap:3px;overflow:auto;margin-bottom:12px;background:var(--panel);border:1px solid var(--border);padding:5px}.tab{border:0;background:transparent;color:var(--muted);padding:10px 14px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.7px;cursor:pointer;white-space:nowrap}.tab.active{background:var(--alt);color:var(--text);box-shadow:inset 0 -2px var(--copper)}.tab-content{display:none}.tab-content.active{display:block}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}.card{background:var(--panel);padding:15px}.label{font:700 11px var(--disp);color:var(--muted);letter-spacing:1px;text-transform:uppercase}.value{font:600 25px var(--mono);margin-top:8px}.unit{font-size:10px;color:var(--muted);margin-left:4px}.grid2{display:grid;grid-template-columns:5fr 3fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:12px}.panel{background:var(--panel);padding:15px 17px;margin-bottom:12px}.grid2 .panel{margin-bottom:0}.panel h2{font:700 14px var(--disp);text-transform:uppercase;letter-spacing:.5px;padding-bottom:9px;margin-bottom:11px;border-bottom:1px solid var(--border)}canvas{width:100%;height:240px}.gauge-wrap{display:flex;gap:18px;align-items:flex-start}.gauge{width:110px;height:110px;position:relative;flex:none}.gauge svg{width:110px;height:110px}.gauge-bg{fill:none;stroke:var(--strong);stroke-width:9}.gauge-val{fill:none;stroke:var(--green);stroke-width:9;stroke-dasharray:314;stroke-dashoffset:314;transform:rotate(-90deg);transform-origin:55px 55px}.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center}.gauge-center b{font:600 20px var(--mono)}.gauge-center small{font-size:9px;color:var(--muted)}#zones{flex:1;min-width:0}.zrow{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:9px 5px;border-bottom:1px solid var(--border);font:11px var(--mono);align-items:center;cursor:pointer}.zrow.active{background:var(--alt);box-shadow:inset 2px 0 var(--copper)}.zone-ok{color:var(--green)}.zone-warn{color:var(--amber)}.zone-crit{color:var(--red)}.led{display:inline-block;width:7px;height:7px;margin-right:5px}.led-green{background:var(--green)}.led-amber{background:var(--amber)}.led-red{background:var(--red)}table{width:100%;border-collapse:collapse;font:11px var(--mono)}th{font:600 9px 'Roboto';text-align:left;color:var(--muted);text-transform:uppercase;padding:8px;border-bottom:1px solid var(--strong)}td{padding:8px;border-bottom:1px solid var(--border)}.tag,.status-pill{display:inline-block;padding:3px 7px;border:1px solid var(--strong);font:700 9px var(--mono)}.tag.high{color:var(--red);border-color:var(--red)}.incident-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px}.incident{background:var(--alt);border:1px solid var(--border);padding:12px}.incident-top{display:flex;justify-content:space-between;gap:10px}.incident img{width:100%;height:150px;object-fit:cover;margin:9px 0;border:1px solid var(--strong)}.incident p{font-size:12px;color:var(--muted);line-height:1.45;margin-top:7px}.meta{font:9px var(--mono);color:var(--copper);margin-top:8px}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.actions button{background:transparent;color:var(--text);border:1px solid var(--strong);padding:7px 8px;font-size:9px;cursor:pointer}.actions button:hover{border-color:var(--copper)}.timeline{margin-top:9px;border-top:1px solid var(--border);padding-top:7px;font-size:9px;color:var(--muted);line-height:1.5}.control-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.control-card{background:var(--alt);border:1px solid var(--border);padding:15px}.control-card h3{font:700 14px var(--disp);text-transform:uppercase;margin-bottom:7px}.control-card p{color:var(--muted);font-size:12px;line-height:1.5}.control-card button{margin-top:12px;padding:10px 12px;border:1px solid var(--strong);background:transparent;color:var(--text);cursor:pointer;font-weight:700}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}.step{background:var(--panel);padding:15px}.step .idx{color:var(--copper);font:700 12px var(--disp)}.step b{display:block;margin:5px 0}.step p{font-size:11px;color:var(--muted);line-height:1.5}.toast{position:fixed;bottom:20px;left:20px;background:var(--panel);border:1px solid var(--strong);border-left:3px solid var(--copper);padding:11px 15px;font:11px var(--mono);z-index:1000;opacity:0;transform:translateY(8px);transition:.2s}.toast.show{opacity:1;transform:none}.overlay{position:fixed;inset:0;background:#090b0c;z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}.overlay.show{display:flex}.ov-title{font:900 45px var(--disp);letter-spacing:5px;color:#fff}.ov-sub{font:11px var(--mono);color:#e8c79a;margin:12px 0 22px}.ov-stats{display:flex;gap:1px;background:#333}.ov-stat{background:#151515;padding:10px 20px;font:11px var(--mono)}.ov-stat b{display:block;font-size:15px;margin-top:3px}.btn-row{display:flex;gap:10px;margin-top:22px}.valve-btn,.ack{padding:12px 20px;font-weight:800;cursor:pointer}.valve-btn{background:var(--amber);border:1px solid var(--amber)}.ack{background:transparent;color:#fff;border:1px solid #777}@media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.control-grid,.steps{grid-template-columns:1fr}}@media(max-width:650px){body{padding:10px}.cards{grid-template-columns:1fr}.nameplate{align-items:flex-start}.controls{width:100%}.zsel{flex:1}.incident-grid{grid-template-columns:1fr}.ov-title{font-size:31px}.ov-stats{flex-wrap:wrap}.tabs{margin-left:-1px;margin-right:-1px}}
+
+/* V14: screen-fit + stronger content + restored left navigation */
+:root{--sidebar-w:248px;--content-max:1680px;--ui-text:#1a2720;--ui-muted:#607067;--ui-green:#18784b;--ui-green-soft:#e8f5ed;--ui-border:#d7e1db}
+html,body{min-height:100%;font-size:16px}
+body{padding:0 0 30px 0;background:#f4f7f5;color:var(--ui-text);overflow-x:hidden}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:#10231b;color:#eaf3ed;display:flex;flex-direction:column;padding:26px 16px 18px;z-index:100;border-right:1px solid #1d3d2d;box-shadow:4px 0 20px rgba(16,35,27,.08)}
+.side-brand{padding:0 12px 26px;border-bottom:1px solid rgba(255,255,255,.1)}
+.side-brand .logo{font-size:34px;letter-spacing:2px;color:#fff}.side-brand .logo span{color:#69c28e}
+.brand-caption{font-size:12px;color:#9db2a5;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-top:3px}
+.side-label{font-size:11px;font-weight:800;letter-spacing:1.6px;color:#799083;padding:25px 12px 9px}
+.side-tabs{display:flex;flex-direction:column;gap:5px}
+.side-tabs .tab{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:9px;background:transparent;color:#aebfb5;padding:13px 12px;font-size:14px;font-weight:800;letter-spacing:.2px;text-transform:none;text-align:left;cursor:pointer;transition:.15s}
+.side-tabs .tab:hover{background:#18362a;color:#fff}.side-tabs .tab.active{background:#1d4934;color:#fff;box-shadow:inset 3px 0 #69c28e}.tab-icon{width:24px;text-align:center;font-size:18px;font-weight:900}.tab-badge{margin-left:auto;min-width:25px;text-align:center;border-radius:999px;padding:3px 7px;background:#c74335;color:#fff;font:800 11px var(--mono)}
+.side-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding:18px 8px 0}.admin-badge{display:flex;align-items:center;gap:10px;margin-bottom:14px}.status-dot{width:9px;height:9px;border-radius:50%;background:#69c28e;box-shadow:0 0 0 4px rgba(105,194,142,.12)}.admin-badge b{display:block;font-size:12px;letter-spacing:1px}.admin-badge small{display:block;color:#8ea79a;font-size:11px;margin-top:2px}.side-bottom .logout{display:block;color:#9fb2a7;text-decoration:none;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:9px 10px;border-radius:7px}.side-bottom .logout:hover{background:#18362a;color:#fff}
+.app-main{margin-left:var(--sidebar-w);padding:0 28px 20px;max-width:calc(100vw - var(--sidebar-w));min-height:calc(100vh - 50px)}
+.topbar{height:82px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid #dce5df;margin-bottom:22px;position:sticky;top:0;background:rgba(244,247,245,.96);backdrop-filter:blur(8px);z-index:50}.page-kicker{font-size:11px;font-weight:900;color:#6b7b72;letter-spacing:1.8px}.page-title{font-size:28px;font-weight:900;letter-spacing:-.5px;margin-top:2px}.top-controls{display:flex;align-items:center;gap:10px}.top-controls .zsel{font-size:12px;padding:10px 13px;border-radius:8px;background:#fff;border:1px solid #cbd7d0;color:#203128;font-weight:700}.status-lamp{font-size:11px!important;padding:8px 11px!important;border-radius:999px!important;background:#fff}.clock{font-size:12px;color:#68766e!important}
+.tab-content{max-width:var(--content-max);margin:0 auto}
+.cards{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;background:transparent;border:0;margin-bottom:18px}.card{border:1px solid var(--ui-border);border-radius:13px;padding:22px 20px;background:#fff;box-shadow:0 4px 15px rgba(24,50,37,.06);min-height:112px}.label{font-family:'Roboto';font-size:12px;font-weight:900;color:#66766d;letter-spacing:1.1px}.value{font-size:34px;font-weight:800;line-height:1.05;margin-top:12px;color:#16231c}.unit{font-size:12px;font-weight:700;color:#728078}
+.grid2{grid-template-columns:1.25fr .75fr;gap:18px;background:transparent;border:0;margin-bottom:18px}.panel{border:1px solid var(--ui-border);border-radius:13px;background:#fff;padding:22px 22px 24px;box-shadow:0 4px 15px rgba(24,50,37,.05);margin-bottom:18px}.panel h2{font-family:'Roboto';font-size:16px;font-weight:900;letter-spacing:.6px;color:#26372e;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid #e5ece7}.panel h2:before{width:7px;height:7px;background:#69a886}
+.control-card{padding:22px;border-radius:12px;background:#fbfdfb;border:1px solid #dfe8e2;box-shadow:none}.control-card h3{font-size:21px;font-weight:900;color:#1b2b22;margin-bottom:8px}.control-card p{font-size:14px;line-height:1.55;color:#627168}.actions{gap:10px}.actions button,.control-card button,.ctrl-btn,.switch{font-size:12px!important;font-weight:800!important;padding:10px 14px!important;border-radius:8px!important}
+.steps{grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.step{background:#fff;border:1px solid var(--ui-border);border-radius:12px;padding:20px;box-shadow:0 4px 15px rgba(24,50,37,.04)}.step .idx{font-size:11px;font-weight:900;letter-spacing:1.2px;color:#1b8050;margin-bottom:9px}.step b{font-size:17px;font-weight:900}.step p{font-size:13px;line-height:1.55;color:#65746b;margin-top:7px}
+.label,.meta{font-size:12px!important;font-weight:800}.value{font-weight:900}.gauge-center b{font-size:31px!important;font-weight:900}.gauge-center small{font-size:11px!important;font-weight:800}.gauge-wrap{gap:28px!important}.incident-grid{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}.incident-card{border:1px solid var(--ui-border)!important;border-radius:12px!important;padding:18px!important;background:#fff!important}.incident-card b{font-size:15px!important}.incident-card p{font-size:13px!important;line-height:1.5!important}.incident-meta{font-size:11px!important}.control-grid{grid-template-columns:repeat(3,1fr);gap:16px}.control-grid .control-card{min-height:170px}table{font-size:12px!important}th{font-size:11px!important;font-weight:900!important}td{font-size:12px!important;padding:10px 8px!important}
+canvas{height:320px!important}
+footer{font-size:10px!important}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.control-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.app-main{padding-left:20px;padding-right:20px}}
+@media(max-width:760px){:root{--sidebar-w:76px}.sidebar{width:var(--sidebar-w);padding:18px 9px}.side-brand{padding:0 0 20px;text-align:center}.side-brand .logo{font-size:23px}.brand-caption,.side-label,.side-tabs .tab span:not(.tab-icon),.admin-badge div,.side-bottom .logout{display:none}.side-tabs .tab{justify-content:center;padding:13px 5px}.tab-icon{font-size:19px}.tab-badge{position:absolute;margin-left:30px;margin-top:-18px}.app-main{margin-left:var(--sidebar-w);max-width:calc(100vw - var(--sidebar-w));padding:0 12px}.topbar{height:72px}.page-title{font-size:23px}.top-controls .zsel{max-width:150px}.cards{grid-template-columns:1fr 1fr}.value{font-size:28px}.panel{padding:18px}.steps,.control-grid{grid-template-columns:1fr}.incident-grid{grid-template-columns:1fr}}
+@media(max-width:500px){.top-controls .zsel{display:none}.cards{grid-template-columns:1fr}.page-title{font-size:21px}.topbar{align-items:flex-start;padding-top:14px}}
+
+/* V16: uploaded leak alert sound */
+#sndBtn.sound-on{background:#e8f5ed!important;color:#18784b!important;border-color:#9bcdb0!important}
+</style>
+<style id="polish">
+:root{--bg:#f5f7f8;--panel:#fff;--alt:#f8fafb;--border:#e3e8ec;--strong:#cbd4da;--text:#172126;--muted:#6c7a82;--green:#16834b;--amber:#b77916;--red:#c74335;--blue:#2563eb;--copper:#1f6f52;--mono:'IBM Plex Mono',monospace;--disp:'Big Shoulders Display',sans-serif}
+*{box-sizing:border-box}body{font-family:'Roboto',sans-serif;background:#f5f7f8;color:var(--text);padding:0;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 80% 0%,rgba(31,111,82,.06),transparent 32%)}
+.site-nav{height:64px;margin:0;background:#10231b;border:0;border-bottom:1px solid #1e3b2e;padding:0 28px;color:#fff;position:sticky;top:0;z-index:20}.logo{font:900 27px var(--disp);letter-spacing:1.5px}.logo span{color:#69c28e}.nav-right{gap:14px}.role{background:rgba(105,194,142,.1);border:1px solid rgba(105,194,142,.35);color:#8de0aa;border-radius:999px;padding:6px 11px}.logout{color:#b9c9c0;padding:7px 10px;border-radius:7px}.logout:hover{background:#18362a;color:#fff}
+.nameplate{margin:0;padding:24px 28px 18px;background:transparent;border:0;max-width:1400px;margin-inline:auto}.brand-mark{font-size:34px}.brand-sub{font-size:11px;letter-spacing:1.7px}.controls{gap:9px}.status-lamp{border-radius:999px;background:#fff;padding:7px 11px;box-shadow:0 2px 8px rgba(20,30,25,.05)}.status-lamp.online{color:var(--green);border-color:#bfe5ce}.status-lamp.offline{color:var(--red);border-color:#efc6c1}.status-lamp:before{content:'●';margin-right:6px;font-size:8px}.clock{background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+.tabs{max-width:1344px;margin:0 auto 18px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:5px;box-shadow:0 2px 10px rgba(20,30,25,.04);position:sticky;top:64px;z-index:15}.tab{border-radius:7px;padding:10px 16px}.tab.active{background:#10231b;color:#fff;box-shadow:none}.tab.active:before{content:'●';color:#69c28e;margin-right:7px;font-size:7px;vertical-align:2px}
+.tab-content{max-width:1344px;margin:0 auto}.cards{grid-template-columns:repeat(5,1fr);gap:12px;background:transparent;border:0}.card{border:1px solid var(--border);border-radius:12px;padding:18px;background:#fff;box-shadow:0 3px 12px rgba(20,30,25,.04);position:relative;overflow:hidden}.card:after{content:"";position:absolute;right:-15px;top:-18px;width:60px;height:60px;border-radius:50%;background:rgba(31,111,82,.06)}.label{font-family:'Roboto';font-size:10px;letter-spacing:1px}.value{font-size:26px;margin-top:10px}.unit{font-size:10px}
+.grid2{grid-template-columns:1.25fr .75fr;gap:14px;background:transparent;border:0}.panel{border:1px solid var(--border);border-radius:12px;background:#fff;padding:18px;box-shadow:0 3px 12px rgba(20,30,25,.04);margin-bottom:14px}.panel h2{font-family:'Roboto';font-size:12px;letter-spacing:1px;color:#33434a;margin-bottom:15px;padding-bottom:12px;display:flex;align-items:center;gap:7px}.panel h2:before{content:'';width:6px;height:6px;background:#69a886;border-radius:50%}canvas{height:260px!important}
+.gauge-wrap{align-items:center}.gauge{width:150px;height:150px}.gauge svg{width:150px;height:150px}.gauge-val{stroke-width:10}.gauge-bg{stroke:#e9eef0}.gauge-center b{font-size:27px}.gauge-center small{font-size:10px}.zrow{border-bottom:1px solid #edf0f2;border-radius:7px;padding:11px 9px;grid-template-columns:1.4fr auto auto auto}.zrow:hover{background:#f5faf7}.zrow.active{background:#edf7f1;box-shadow:inset 3px 0 #16834b}.zrow b{color:#233139}.zone-ok{color:var(--green)}.zone-warn{color:var(--amber)}.zone-crit{color:var(--red)}
+table{font-size:11px}th{background:#f7f9fa;padding:10px;color:#738088}td{padding:11px;border-bottom:1px solid #edf0f2}.tag,.status-pill{border-radius:999px;padding:4px 8px}.tag.high{background:#fff0ed;border-color:#f2c2bb;color:var(--red)}
+.incident-grid{gap:14px}.incident{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 3px 12px rgba(20,30,25,.04)}.incident:hover{border-color:#b9d6c5;transform:translateY(-1px);transition:.15s}.incident img{height:165px;border-radius:8px;border:0}.status-pill{background:#edf7f1;color:var(--green);border-color:#c8e5d2}.incident p{color:#52616a}.timeline{background:#f7f9fa;border:1px solid #e9eef0;border-radius:8px;padding:8px}.actions button{border-radius:7px;background:#fff}.actions button:first-child{border-color:#b7d7c3;color:#12663a}.actions button:nth-child(2){background:#10231b;color:#fff;border-color:#10231b}
+.control-grid{gap:14px}.control-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 3px 12px rgba(20,30,25,.04)}.control-card button,.ctrl-btn,.zsel,.switch{border-radius:7px;background:#fff;border-color:#cbd5da}.control-card button:hover,.ctrl-btn:hover{border-color:#16834b;color:#12663a}.switch.open{color:var(--green);background:#edf7f1}.switch.closed{color:var(--red);background:#fff0ed}
+.steps{gap:14px;background:transparent;border:0}.step{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:0 3px 12px rgba(20,30,25,.04)}.step .idx{color:var(--green);font-family:'Roboto';font-weight:800;font-size:10px;letter-spacing:1px}.toast{left:auto;right:24px;bottom:24px;background:#10231b;color:#fff;border:0;border-left:3px solid #69c28e;border-radius:9px;box-shadow:0 8px 30px rgba(0,0,0,.2)}.overlay{background:rgba(7,18,13,.97)}.valve-btn{border-radius:8px}.ack{border-radius:8px}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.tab-content{padding:0 16px}.tabs{margin-left:16px;margin-right:16px}.nameplate{padding-left:16px;padding-right:16px}}
+@media(max-width:700px){.cards{grid-template-columns:repeat(2,1fr)}.site-nav{padding:0 16px}.role{display:none}.tabs{top:64px}.nameplate{flex-direction:column;align-items:flex-start}.cards{gap:8px}.card{padding:14px}.value{font-size:21px}}
+@media(max-width:480px){.cards{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{padding:9px 12px}.gauge-wrap{flex-direction:column;align-items:flex-start}}
+
+/* ---- V12 left navigation ---- */
+@media (min-width: 701px){
+  body{padding:0 28px 35px 0;}
+  .site-nav{
+    position:fixed;left:0;top:0;bottom:0;width:248px;height:100vh;
+    margin:0;padding:24px 16px 18px;display:flex;flex-direction:column;
+    align-items:stretch;justify-content:flex-start;gap:28px;
+    border-right:1px solid #dce5e0;border-bottom:0;border-radius:0;
+    box-shadow:8px 0 28px rgba(16,35,27,.06);z-index:50;
+  }
+  .logo{padding:0 10px 18px;border-bottom:1px solid rgba(255,255,255,.12);}
+  .nav-right{margin-top:auto;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.12)}
+  .role{text-align:center;display:block}
+  .logout{text-align:center;display:block;background:#18362a}
+  .tabs{
+    position:fixed;left:16px;top:108px;width:216px;bottom:125px;
+    margin:0;padding:8px;display:flex;flex-direction:column;gap:4px;
+    overflow:visible;background:transparent;border:0;box-shadow:none;z-index:55;
+  }
+  .tab{width:100%;text-align:left;padding:12px 14px;border-radius:9px;font-size:11px;letter-spacing:.8px;}
+  .tab:hover{background:#173026;color:#fff}
+  .tab.active{background:#173026;color:#fff;box-shadow:none}
+  .tab.active:before{color:#69c28e}
+  .nameplate{margin-left:276px;margin-right:0;padding:28px 28px 18px;max-width:none;}
+  .tab-content{margin-left:276px;margin-right:0;max-width:none;padding:0 28px 0 0;}
+  footer{margin-left:276px!important;margin-right:0;padding-right:28px!important}
+}
+@media (max-width:700px){
+  .site-nav{position:sticky;top:0;z-index:50}
+  .tabs{position:sticky;top:64px;z-index:45}
+}
+
+/* V16 — Minimal light UI / alignment pass */
+:root{
+  --sidebar-w:232px;
+  --ui-bg:#f6f8f7;
+  --ui-surface:#ffffff;
+  --ui-surface-soft:#f9fbfa;
+  --ui-border:#e2e8e4;
+  --ui-border-strong:#cfd9d3;
+  --ui-text:#18231e;
+  --ui-muted:#66736c;
+  --ui-green:#2f8f5b;
+  --ui-green-dark:#236f47;
+  --ui-green-soft:#eaf6ef;
+  --ui-amber:#b98128;
+  --ui-amber-soft:#fff6e7;
+  --ui-red:#c85a4b;
+  --ui-red-soft:#fff0ed;
+  --ui-shadow:0 2px 12px rgba(28,48,38,.045);
+}
+html,body{font-family:'Roboto',system-ui,sans-serif;background:var(--ui-bg);color:var(--ui-text)}
+body{padding:0 0 28px 0;overflow-x:hidden}
+body:before{display:none}
+.sidebar{width:var(--sidebar-w);background:#fff;color:var(--ui-text);border-right:1px solid var(--ui-border);box-shadow:2px 0 12px rgba(28,48,38,.035);padding:22px 14px 16px}
+.side-brand{padding:2px 12px 22px;border-bottom:1px solid var(--ui-border)}
+.side-brand .logo{font-family:'Roboto',sans-serif;font-size:26px;font-weight:900;letter-spacing:1.5px;color:var(--ui-text)}
+.side-brand .logo span{color:var(--ui-green)}
+.brand-caption{font-size:10px;color:var(--ui-muted);font-weight:700;letter-spacing:1.1px;margin-top:4px}
+.side-label{padding:22px 12px 8px;color:#89958e;font-size:10px;letter-spacing:1.4px}
+.side-tabs{gap:3px}
+.side-tabs .tab{color:#65736b;border-radius:8px;padding:11px 12px;font-size:13px;font-weight:700;letter-spacing:0}
+.side-tabs .tab:hover{background:#f2f7f4;color:var(--ui-green-dark)}
+.side-tabs .tab.active{background:var(--ui-green-soft);color:var(--ui-green-dark);box-shadow:inset 3px 0 var(--ui-green)}
+.tab-icon{font-size:16px;color:#829089}
+.side-tabs .tab.active .tab-icon{color:var(--ui-green)}
+.tab-badge{background:var(--ui-red);font-size:10px;padding:3px 7px}
+.side-bottom{border-top:1px solid var(--ui-border);padding:15px 8px 0}
+.status-dot{background:#55a978;box-shadow:0 0 0 4px rgba(85,169,120,.10)}
+.admin-badge b{color:var(--ui-text);font-size:11px}
+.admin-badge small{color:#849189}
+.side-bottom .logout{color:#68756e;font-size:11px}
+.side-bottom .logout:hover{background:#f2f7f4;color:var(--ui-green-dark)}
+.app-main{margin-left:var(--sidebar-w);max-width:none;min-height:100vh;padding:0 34px 24px}
+.topbar{height:76px;margin:0 0 24px;padding:0;border-bottom:1px solid var(--ui-border);background:rgba(246,248,247,.94)}
+.page-kicker{font-size:10px;color:#829087;letter-spacing:1.4px}
+.page-title{font-size:25px;font-weight:800;letter-spacing:-.4px;color:var(--ui-text)}
+.top-controls{gap:8px}
+.top-controls .zsel{min-width:190px;padding:9px 12px;border:1px solid var(--ui-border-strong);border-radius:7px;background:#fff;color:#33423a;font:600 12px 'Roboto',sans-serif}
+.status-lamp{padding:7px 10px!important;border-radius:999px!important;box-shadow:none!important;font-size:10px!important;font-family:'Roboto',sans-serif!important;font-weight:700!important}
+.status-lamp.online{background:var(--ui-green-soft);color:var(--ui-green-dark);border-color:#c9e6d3}
+.status-lamp.offline{background:var(--ui-red-soft);color:#a9473b;border-color:#f0c8c2}
+.clock{font:500 11px 'Roboto',sans-serif!important;background:transparent!important;border:0!important;padding:0!important;color:#7b8881!important}
+.site-nav{display:none!important}
+.tabs[aria-hidden="true"]{display:none!important}
+.tab-content{width:100%;max-width:1500px;margin:0 auto;padding:0}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.card{min-width:0;min-height:108px;padding:18px;border:1px solid var(--ui-border);border-radius:10px;background:var(--ui-surface);box-shadow:var(--ui-shadow)}
+.card:after{display:none}
+.label{font-family:'Roboto',sans-serif;font-size:10px;font-weight:700;letter-spacing:.8px;color:#78857e}
+.value{font-family:'Roboto',sans-serif;font-size:29px;font-weight:800;line-height:1.1;color:var(--ui-text);margin-top:9px}
+.unit{font-size:11px;font-weight:600;color:#849089}
+.grid2{gap:12px;margin-bottom:18px}
+.panel{min-width:0;padding:18px;margin-bottom:12px;border:1px solid var(--ui-border);border-radius:10px;background:var(--ui-surface);box-shadow:var(--ui-shadow)}
+.panel h2{font-family:'Roboto',sans-serif;font-size:13px;font-weight:800;letter-spacing:.35px;color:#34433b;padding-bottom:11px;margin-bottom:13px;border-bottom:1px solid #edf1ee}
+.panel h2:before{background:#71b18d!important}
+canvas{height:300px!important}
+#zones{width:100%}
+.zrow{grid-template-columns:minmax(180px,1.7fr) .8fr .8fr .55fr;gap:10px;min-height:42px;padding:10px 9px;border-bottom:1px solid #eef2ef;border-radius:6px;font-family:'Roboto',sans-serif;font-size:12px;color:#5d6a63}
+.zrow b{font-weight:700;color:#26362e}
+.zrow.active{background:var(--ui-green-soft);box-shadow:inset 3px 0 var(--ui-green)}
+.zrow:hover{background:#f5f9f6}
+.led{width:7px;height:7px;border-radius:50%}
+.gauge-wrap{gap:24px!important}
+.gauge{width:140px;height:140px}
+.gauge svg{width:140px;height:140px}
+.gauge-center b{font-family:'Roboto',sans-serif!important;font-size:27px!important;font-weight:800!important}
+.gauge-center small{font-family:'Roboto',sans-serif!important;color:#7b8881!important}
+.gauge-bg{stroke:#e8eeea}
+#status{font-family:'Roboto',sans-serif!important;font-size:25px!important;font-weight:800!important}
+.meta{font-family:'Roboto',sans-serif!important;color:#75827b!important;font-size:11px!important}
+table{font-family:'Roboto',sans-serif!important}
+th{font-family:'Roboto',sans-serif!important;font-size:10px!important;font-weight:700!important;color:#7a8780!important;background:#f8faf9!important;padding:9px 10px!important}
+td{font-family:'Roboto',sans-serif!important;font-size:11px!important;color:#526159;padding:10px!important;border-bottom:1px solid #eef2ef!important}
+.tag,.status-pill{font-family:'Roboto',sans-serif!important;font-size:9px!important;font-weight:700!important;border-radius:999px}
+.tag.high{background:var(--ui-red-soft);color:#ad493e;border-color:#efc9c3}
+.incident-grid{gap:12px}
+.incident{background:#fff;border:1px solid var(--ui-border);border-radius:10px;padding:14px;box-shadow:var(--ui-shadow)}
+.incident:hover{border-color:#c9ddd0;transform:none}
+.incident img{height:150px;border-radius:7px;border:1px solid #e5ebe7}
+.incident-top b{font-size:13px!important;color:#26362e}
+.incident p{font-family:'Roboto',sans-serif!important;font-size:12px!important;color:#5e6c64!important}
+.meta{font-size:10px!important;color:#829087!important}
+.timeline{font-family:'Roboto',sans-serif!important;background:#f8faf9;border:1px solid #e9efeb;border-radius:7px;color:#78857e}
+.actions{gap:7px}
+.actions button,.control-card button,.ctrl-btn,.switch{font-family:'Roboto',sans-serif!important;font-size:11px!important;font-weight:700!important;border-radius:7px!important}
+.actions button{background:#fff;border:1px solid #d4ded8;color:#4b5c53;padding:8px 10px!important}
+.actions button:first-child{border-color:#bcd9c7;color:#27764b;background:#f4faf6}
+.actions button:nth-child(2){background:var(--ui-green);border-color:var(--ui-green);color:#fff}
+.actions button:hover{transform:none;filter:brightness(.98)}
+.control-grid{gap:12px}
+.control-card{min-height:155px;background:var(--ui-surface-soft);border:1px solid var(--ui-border);border-radius:10px;padding:18px}
+.control-card h3{font-family:'Roboto',sans-serif!important;font-size:16px!important;font-weight:800!important;color:#26362e!important}
+.control-card p{font-family:'Roboto',sans-serif!important;font-size:12px!important;color:#65736b!important;line-height:1.5!important}
+.control-card button{background:#fff;border:1px solid #ccd8d1;color:#405149;padding:9px 12px!important}
+.control-card button:hover,.ctrl-btn:hover{border-color:#9bc5aa;color:var(--ui-green-dark);background:#f6fbf8}
+.switch.open{background:var(--ui-green-soft);color:var(--ui-green-dark);border-color:#c7e3d0}
+.switch.closed{background:var(--ui-red-soft);color:#ad493e;border-color:#edc9c3}
+.steps{gap:12px;margin-bottom:18px}
+.step{padding:17px;border:1px solid var(--ui-border);border-radius:10px;background:#fff;box-shadow:none}
+.step .idx{font-family:'Roboto',sans-serif!important;font-size:10px;color:var(--ui-green)!important}
+.step b{font-size:15px;color:#293a31}
+.step p{font-family:'Roboto',sans-serif;font-size:12px;color:#6a776f;line-height:1.5}
+.toast{right:22px;bottom:22px;left:auto;background:#fff;color:#304038;border:1px solid var(--ui-border);border-left:3px solid var(--ui-green);border-radius:8px;box-shadow:0 8px 25px rgba(28,48,38,.10);font-family:'Roboto',sans-serif;font-size:12px}
+.overlay{background:rgba(18,31,24,.96)}
+.valve-btn{background:#d78d2f;border-color:#d78d2f;border-radius:7px}
+.ack{border-radius:7px}
+@media(max-width:1100px){
+  .app-main{padding-left:24px;padding-right:24px}
+  .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  :root{--sidebar-w:72px}
+  .sidebar{width:var(--sidebar-w);padding:18px 8px}
+  .side-brand{padding:0 0 18px;text-align:center}
+  .side-brand .logo{font-size:21px}
+  .brand-caption,.side-label,.side-tabs .tab span:not(.tab-icon),.admin-badge div,.side-bottom .logout{display:none}
+  .side-tabs .tab{justify-content:center;padding:12px 4px}
+  .tab-icon{font-size:17px}
+  .tab-badge{position:absolute;margin-left:28px;margin-top:-17px}
+  .app-main{margin-left:var(--sidebar-w);max-width:none;padding:0 12px 20px}
+  .topbar{height:68px;margin-bottom:18px}
+  .page-title{font-size:21px}
+  .top-controls .zsel{min-width:120px;max-width:145px}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card{min-height:96px;padding:15px}
+  .value{font-size:25px}
+}
+@media(max-width:500px){
+  .top-controls .zsel{display:none}
+  .cards{grid-template-columns:1fr}
+  .topbar{align-items:center}
+  .page-title{font-size:20px}
+  .grid2{gap:8px}
+  .panel{padding:15px}
+  .gauge-wrap{flex-direction:column;align-items:flex-start}
+}
+
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="side-brand"><div class="logo">LEAK<span>X</span></div><div class="brand-caption">Water Operations</div></div>
+  <div class="side-label">WORKSPACE</div>
+  <div class="side-tabs" role="tablist">
+    <button class="tab active" data-tab="overview"><span class="tab-icon">⌂</span><span>Overview</span></button>
+    <button class="tab" data-tab="monitoring"><span class="tab-icon">◉</span><span>Live Monitoring</span></button>
+    <button class="tab" data-tab="incidents"><span class="tab-icon">!</span><span>Incidents</span><span class="tab-badge" id="incidentBadge">0</span></button>
+    <button class="tab" data-tab="reports"><span class="tab-icon">▤</span><span>Reports</span></button>
+    <button class="tab" data-tab="controls"><span class="tab-icon">⚙</span><span>Controls</span></button>
+  </div>
+  <div class="side-bottom">
+    <div class="admin-badge"><span class="status-dot"></span><div><b>ADMIN</b><small>Control Center</small></div></div>
+    <a class="logout" id="logoutLink" href="#">Log out</a>
+  </div>
+</aside>
+
+<main class="app-main">
+  <header class="topbar">
+    <div><div class="page-kicker">OPERATIONS CONSOLE</div><div class="page-title" id="pageTitle">Overview</div></div>
+    <div class="top-controls"><select class="zsel" id="zoneSelectTop" onchange="changeZone(this.value)">__ZONE_OPTIONS__</select><span class="status-lamp offline" id="pill">Offline</span><span class="clock" id="clock">--:--:--</span></div>
+  </header>
+  <div class="tabs" role="tablist" aria-hidden="true" style="display:none"><button class="tab active" data-tab="overview"></button><button class="tab" data-tab="monitoring"></button><button class="tab" data-tab="incidents"></button><button class="tab" data-tab="reports"></button><button class="tab" data-tab="controls"></button></div>
+
+<section class="tab-content active" id="tab-overview">
+<div class="cards"><div class="card"><div class="label">Active Leaks</div><div class="value" id="activeLeaks">--</div></div><div class="card"><div class="label">Water Lost</div><div class="value"><span id="loss">--</span><span class="unit">L</span></div></div><div class="card"><div class="label">Open Reports</div><div class="value" id="openReports">--</div></div><div class="card"><div class="label">Zones at Risk</div><div class="value" id="zonesRisk">--</div></div><div class="card"><div class="label">System</div><div class="value" id="systemStatus">--</div></div></div>
+<div class="grid2"><div class="panel"><h2>Zone Status</h2><div id="zones">Loading…</div></div><div class="panel"><h2>Current Zone</h2><div class="control-card"><h3 id="overviewZone">Zone</h3><p>Use Live Monitoring to inspect telemetry or Controls to isolate the selected zone.</p><div class="actions"><button type="button" onclick="setTab('monitoring')">Open Telemetry</button><button type="button" onclick="setTab('controls')">Open Controls</button></div></div></div></div>
+<div class="steps"><div class="step"><div class="idx">01 — Sense</div><b>Sensor layer</b><p>Flow and pressure readings update every two seconds through the existing API.</p></div><div class="step"><div class="idx">02 — Detect</div><b>Leak detection</b><p>High flow and pressure-drop conditions are classified as leak events.</p></div><div class="step"><div class="idx">03 — Respond</div><b>Incident response</b><p>Admins can investigate reports, change status, and isolate a zone valve.</p></div></div>
+</section>
+
+<section class="tab-content" id="tab-monitoring">
+<div class="panel"><div class="controls" style="margin-bottom:10px"><select class="zsel" id="zoneSelect" onchange="changeZone(this.value)">__ZONE_OPTIONS__</select><button class="ctrl-btn" id="sndBtn" onclick="enableSound()">Alarm Sound — Off</button><button class="ctrl-btn" onclick="simulateLeak()">▶ Simulate Leak</button><button class="ctrl-btn" onclick="resetDemo()">Reset Demo</button></div><h2>Flow Telemetry — <span id="chartZoneName"></span> — threshold 12 L/min</h2><canvas id="chart"></canvas></div>
+<div class="grid2"><div class="panel"><h2>Flow Gauge</h2><div class="gauge-wrap"><div class="gauge"><svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="45" class="gauge-bg"/><circle cx="55" cy="55" r="45" class="gauge-val" id="gaugeVal"/></svg><div class="gauge-center"><b id="gaugeFlow">--</b><small>L/min</small></div></div><div><div class="label">Pipe Status</div><div class="value" id="status">--</div><div class="meta" id="pressure">Pressure: -- PSI</div></div></div></div><div class="panel"><h2>Alarm Log</h2><table><thead><tr><th>Time</th><th>Flow</th><th>Pressure</th><th>Loss</th><th>Severity</th></tr></thead><tbody id="alertRows"></tbody></table></div></div>
+</section>
+
+<section class="tab-content" id="tab-incidents"><div class="panel"><h2>Customer & Community Incidents</h2><div id="communityReports" class="incident-grid">Loading incidents…</div></div></section>
+
+<section class="tab-content" id="tab-reports"><div class="panel"><h2>Export Sensor Report</h2><div class="control-grid"><div class="control-card"><h3>Selected Zone</h3><p id="reportZoneText">Zone A - Main Line</p><button type="button" onclick="exportCsv()">Export CSV</button></div><div class="control-card"><h3>Incident Summary</h3><p>Use the Incidents tab to review citizen photos, status, and timelines.</p><button type="button" onclick="setTab('incidents')">View Incidents</button></div><div class="control-card"><h3>Live Data</h3><p>The dashboard keeps the existing SQLite sensor pipeline and refreshes live readings.</p><button type="button" onclick="setTab('monitoring')">View Monitoring</button></div></div></div></section>
+
+<section class="tab-content" id="tab-controls"><div class="panel"><h2>Zone & Valve Controls</h2><div class="control-grid"><div class="control-card"><h3>Selected Zone</h3><p id="controlZoneText">Zone A - Main Line</p><div class="actions"><button type="button" onclick="toggleValve()">Toggle Valve</button><button type="button" onclick="shutValve()">Shut Valve</button></div></div><div class="control-card"><h3>Demo Leak</h3><p>Trigger a simulated leak in the selected zone for your hackathon demonstration.</p><div class="actions"><button type="button" onclick="simulateLeak()">Simulate Leak</button><button type="button" onclick="resetDemo()">Reset</button></div></div><div class="control-card"><h3>Valve State</h3><p id="valveStateText">Loading…</p></div></div></div></section>
+
+</main>
+<footer style="text-align:center;color:var(--muted);font:10px var(--mono);padding:10px 20px 18px;margin-left:260px">LeakX — FastAPI + SQLite — role-based operations console</footer>
+<div class="toast" id="toast" aria-live="polite"></div>
+<div class="overlay" id="overlay"><div class="ov-title">LEAK DETECTED</div><div class="ov-sub">Pipeline <span id="ovZoneName">ZONE</span> — immediate action required</div><div class="ov-stats"><div class="ov-stat">Flow<b><span id="ovFlow">--</span> L/min</b></div><div class="ov-stat">Pressure<b><span id="ovPressure">--</span> PSI</b></div><div class="ov-stat">Loss<b><span id="ovLoss">--</span> L</b></div></div><div class="btn-row"><button class="valve-btn" type="button" onclick="shutValve()">Shut Valve</button><button class="ack" type="button" onclick="ackAlert()">Acknowledge</button></div></div>
+<script>
+const $=id=>document.getElementById(id);const ZONE_NAMES=__ZONE_NAMES_JSON__;let currentZone=ZONE_NAMES[0],wasLeak=false,acknowledged=false,soundOn=false;
+const alarmAudio=new Audio('/static/leak-alert.mp3');
+alarmAudio.preload='auto';
+alarmAudio.volume=0.72;
+alarmAudio.loop=true;
+function setTab(name){document.querySelectorAll('.side-tabs .tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.tab-content').forEach(s=>s.classList.toggle('active',s.id==='tab-'+name));const titles={overview:'Overview',monitoring:'Live Monitoring',incidents:'Incident Management',reports:'Reports & Analytics',controls:'Zone & Valve Controls'};if($('pageTitle'))$('pageTitle').textContent=titles[name]||name;if(name==='incidents')loadCommunityReports();}
+document.querySelectorAll('.side-tabs .tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+$('logoutLink').addEventListener('click',async e=>{e.preventDefault();await fetch('/logout',{method:'POST'});location.href='/';});setInterval(()=>$('clock').textContent=new Date().toLocaleTimeString(),1000);
+async function j(p){const r=await fetch(p);if(!r.ok)throw new Error((await r.json()).detail||'Request failed');return r.json()};function zq(path){return path+(path.includes('?')?'&':'?')+'zone='+encodeURIComponent(currentZone)}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function changeZone(z){currentZone=z;if($('zoneSelectTop'))$('zoneSelectTop').value=z;if($('zoneSelect'))$('zoneSelect').value=z;if($('chartZoneName'))$('chartZoneName').textContent=z;if($('overviewZone'))$('overviewZone').textContent=z;if($('controlZoneText'))$('controlZoneText').textContent=z;if($('reportZoneText'))$('reportZoneText').textContent=z;wasLeak=false;acknowledged=false;$('overlay').classList.remove('show');stopSiren();refresh()}
+function updateValveChip(closed){$('valveStateText').textContent=closed?'Valve is SHUT — flow isolated':'Valve is OPEN — monitoring active'}
+async function toggleValve(){const d=await j(zq('/valve'));const url=d.valve_closed?'/valve/open':'/valve/close';const r=await fetch(zq(url),{method:'POST'});const x=await r.json();updateValveChip(x.valve_closed);toast(x.message)}
+async function shutValve(){const r=await fetch(zq('/valve/close'),{method:'POST'});const x=await r.json();if(r.ok){updateValveChip(true);acknowledged=true;$('overlay').classList.remove('show');stopSiren();toast(x.message)}else toast(x.detail||'Valve action failed')}
+async function simulateLeak(){const fd=new FormData();fd.append('zone',currentZone);const r=await fetch('/api/demo/leak',{method:'POST',body:fd});const x=await r.json();toast(x.message)}async function resetDemo(){const fd=new FormData();fd.append('zone',currentZone);const r=await fetch('/api/demo/reset',{method:'POST',body:fd});const x=await r.json();toast(x.message)}
+function exportCsv(){window.open('/report?zone='+encodeURIComponent(currentZone),'_blank')}
+async function enableSound(){
+  soundOn=!soundOn;
+  const btn=$('sndBtn');
+  btn.textContent=soundOn?'Alarm Sound — On':'Alarm Sound — Off';
+  btn.classList.toggle('sound-on',soundOn);
+  if(!soundOn){
+    stopSiren();
+    toast('Alarm sound disabled');
+    return;
+  }
+  try{
+    alarmAudio.muted=true;
+    alarmAudio.currentTime=0;
+    await alarmAudio.play();
+    alarmAudio.pause();
+    alarmAudio.currentTime=0;
+    alarmAudio.muted=false;
+    toast('Alarm sound enabled');
+  }catch(e){
+    alarmAudio.muted=false;
+    // Keep the toggle ON: the browser may block the test playback, but a
+    // future leak alert can still attempt playback from a user-enabled state.
+    toast('Alarm sound enabled — browser audio test was blocked');
+  }
+}
+async function startSiren(){
+  if(!soundOn || !alarmAudio.paused)return;
+  try{
+    alarmAudio.currentTime=0;
+    await alarmAudio.play();
+  }catch(e){
+    console.warn('Leak alert audio could not play:',e);
+    toast('Alarm detected — click Alarm Sound to enable audio');
+  }
+}
+function stopSiren(){
+  alarmAudio.pause();
+  alarmAudio.currentTime=0;
+}
+function ackAlert(){acknowledged=true;$('overlay').classList.remove('show');stopSiren()}
+function setGauge(flow){const v=Math.min(Math.max(Number(flow)||0,0),16);$('gaugeVal').style.strokeDashoffset=314*(1-v/16);$('gaugeVal').style.stroke=v>12?'#c85a4b':v>9?'#b98128':'#2f8f5b';$('gaugeFlow').textContent=flow??'--'}
+function drawChart(readings){const c=$('chart'),ctx=c.getContext('2d'),W=c.width=c.clientWidth,H=c.height=c.clientHeight;ctx.clearRect(0,0,W,H);const d=readings.slice(-40).map(r=>Number(r.flow));if(d.length<2)return;const max=Math.max(14,...d)+2,x=i=>10+i*(W-20)/(d.length-1),y=v=>H-10-(v/max)*(H-30);ctx.strokeStyle='#d98b82';ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(10,y(12));ctx.lineTo(W-10,y(12));ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='#4d9a70';ctx.lineWidth=2;ctx.beginPath();d.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.stroke()}
+function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+async function loadCommunityReports(){try{const d=await j('/api/leak-reports');const box=$('communityReports');if(!d.reports.length){box.innerHTML='<div style="color:var(--muted)">No community incidents yet.</div>';return}box.innerHTML=d.reports.map(r=>{const ev=(r.events||[]).slice(-4).reverse().map(e=>`<div>${safe(e.timestamp)} — ${safe(e.event)}${e.actor?' · '+safe(e.actor):''}</div>`).join('');return `<article class="incident">${r.image_url?`<img src="${r.image_url}" alt="Customer leak photo">`:''}<div class="incident-top"><b>#${r.id} · ${safe(r.zone||'Zone not selected')}</b><span class="status-pill">${safe(r.status)}</span></div><p><b>${safe(r.location)}</b><br>${safe(r.description||'No description')}</p><div class="meta">${safe(r.timestamp)} · ${safe(r.reporter_username||'customer')}</div><div class="timeline">${ev||'No timeline events.'}</div><div class="actions"><button onclick="setIncidentStatus(${r.id},'INVESTIGATING')">Investigate</button><button onclick="setIncidentStatus(${r.id},'RESOLVED')">Resolve</button><button onclick="incidentValve(${r.id},'close','${safe(r.zone||currentZone)}')">Shut Valve</button></div></article>`}).join('')}catch(e){$('communityReports').textContent='Unable to load incidents.'}}
+async function setIncidentStatus(id,status){const fd=new FormData();fd.append('status',status);const r=await fetch(`/api/leak-reports/${id}/status`,{method:'POST',body:fd});const d=await r.json();toast(r.ok?`Incident #${id} → ${status}`:(d.detail||'Update failed'));loadCommunityReports()}
+async function incidentValve(id,action,zone){const fd=new FormData();fd.append('action',action);fd.append('zone',zone);const r=await fetch(`/api/leak-reports/${id}/valve`,{method:'POST',body:fd});const d=await r.json();toast(r.ok?`Valve ${action}ed for ${zone}`:(d.detail||'Valve action failed'));if(r.ok&&zone===currentZone)updateValveChip(d.valve_closed)}
+async function refresh(){
+  try{
+    // Core telemetry requests. If these succeed, the monitoring system is online.
+    const [latest,alerts,loss,zones,all,valve]=await Promise.all([
+      j(zq('/latest')),j(zq('/alerts')),j(zq('/water-loss')),j('/zones'),j(zq('/readings')),j(zq('/valve'))
+    ]);
+
+    $('pill').className='status-lamp online';
+    $('pill').textContent='System Online';
+    if($('flow')) $('flow').textContent=latest.flow??'--';
+    if($('pressure')) $('pressure').textContent='Pressure: '+(latest.pressure??'--')+' PSI';
+    if($('loss')) $('loss').textContent=loss.estimated_water_loss_liters??'--';
+    if($('status')){$('status').textContent=latest.status??'--';$('status').style.color=latest.status==='LEAK'?'#c85a4b':'#2f8f5b';}
+    updateValveChip(valve.valve_closed);
+    setGauge(latest.flow);
+
+    const zoneRows=zones.zones||[];
+    const leaks=zoneRows.filter(z=>z.status==='CRITICAL').length;
+    if($('activeLeaks')) $('activeLeaks').textContent=leaks;
+    if($('zonesRisk')) $('zonesRisk').textContent=zoneRows.filter(z=>z.status!=='NORMAL').length;
+    if($('systemStatus')) $('systemStatus').textContent='ONLINE';
+
+    // Community reports are useful but should never make the telemetry system look offline.
+    try{
+      const incidents=await j('/api/leak-reports');
+      if($('openReports')) $('openReports').textContent=(incidents.reports||[]).filter(r=>r.status!=='RESOLVED').length;
+    }catch(reportError){
+      if($('openReports')) $('openReports').textContent='—';
+      console.warn('Community reports unavailable:',reportError);
+    }
+
+    if($('zones')) $('zones').innerHTML=zoneRows.map(z=>`<div class="zrow ${z.zone===currentZone?'active':''}" onclick="changeZone('${safe(z.zone)}')"><b><span class="led ${z.status==='CRITICAL'?'led-red':z.status==='WARNING'?'led-amber':'led-green'}"></span>${safe(z.zone)}</b><span class="${z.status==='CRITICAL'?'zone-crit':z.status==='WARNING'?'zone-warn':'zone-ok'}">${z.status}</span><span>${z.flow} L/min</span><span>${z.priority}</span></div>`).join('');
+    if($('alertRows')) $('alertRows').innerHTML=(alerts.alerts||[]).slice(-10).reverse().map(a=>`<tr><td>${safe(a.timestamp)}</td><td>${a.flow}</td><td>${a.pressure}</td><td>${a.estimated_loss_lpm}</td><td><span class="tag high">${a.severity}</span></td></tr>`).join('')||'<tr><td colspan="5">No leak events</td></tr>';
+    drawChart(all.readings||[]);
+
+    const leak=latest.status==='LEAK';
+    if(leak&&!wasLeak){acknowledged=false;toast(`Critical leak detected in ${currentZone}`)}
+    wasLeak=leak;
+    if(leak&&!acknowledged){
+      $('ovZoneName').textContent=currentZone.toUpperCase();
+      $('ovFlow').textContent=latest.flow;
+      $('ovPressure').textContent=latest.pressure;
+      $('ovLoss').textContent=loss.estimated_water_loss_liters;
+      $('overlay').classList.add('show');startSiren();
+    }else if(!leak){$('overlay').classList.remove('show');stopSiren()}
+  }catch(e){
+    $('pill').className='status-lamp offline';
+    $('pill').textContent='Telemetry Offline';
+    if($('systemStatus')) $('systemStatus').textContent='OFFLINE';
+    console.error('LeakX telemetry refresh failed:',e);
+  }
+}
+$('chartZoneName').textContent=currentZone;$('overviewZone').textContent=currentZone;$('controlZoneText').textContent=currentZone;$('reportZoneText').textContent=currentZone;refresh();setInterval(refresh,2500);setInterval(()=>{if(document.getElementById('tab-incidents').classList.contains('active'))loadCommunityReports()},8000);
+</script>
+</body></html>

@@ -2,8 +2,6 @@ import sqlite3
 
 DATABASE = "leakx.db"
 
-# Single source of truth for zone names <-> their DB column prefixes.
-# main.py imports ZONE_SLUGS from here so both stay in sync.
 ZONE_SLUGS = {
     "Zone A - Main Line": "zone_a",
     "Zone B - North District": "zone_b",
@@ -58,6 +56,53 @@ def create_database():
     # exists, so if the wide columns aren't there yet, migrate it.
     if "zone_a_flow" not in columns:
         _migrate_legacy_schema(connection, cursor, columns)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS leak_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            name TEXT,
+            contact TEXT,
+            location TEXT NOT NULL,
+            description TEXT,
+            image_filename TEXT,
+            status TEXT NOT NULL DEFAULT 'NEW',
+            zone TEXT
+        )
+    """)
+    connection.commit()
+
+    # Add reporter_username to older leak_reports tables if necessary.
+    cursor.execute("PRAGMA table_info(leak_reports)")
+    leak_columns = [row[1] for row in cursor.fetchall()]
+    if "reporter_username" not in leak_columns:
+        cursor.execute("ALTER TABLE leak_reports ADD COLUMN reporter_username TEXT")
+        connection.commit()
+    if "zone" not in leak_columns:
+        cursor.execute("ALTER TABLE leak_reports ADD COLUMN zone TEXT")
+        connection.commit()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS incident_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_id INTEGER NOT NULL,
+            timestamp TEXT NOT NULL,
+            event TEXT NOT NULL,
+            actor TEXT,
+            details TEXT
+        )
+    """)
+    connection.commit()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('customer','admin'))
+        )
+    """)
+    connection.commit()
 
     connection.close()
 
@@ -200,3 +245,94 @@ def get_latest_per_zone():
         })
 
     return result
+
+
+def add_leak_report(timestamp, name, contact, location, description, image_filename, reporter_username=None, zone=None):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        INSERT INTO leak_reports
+        (timestamp, name, contact, location, description, image_filename, status, reporter_username, zone)
+        VALUES (?, ?, ?, ?, ?, ?, 'NEW', ?, ?)
+        """,
+        (timestamp, name, contact, location, description, image_filename, reporter_username, zone),
+    )
+    report_id = cursor.lastrowid
+    connection.commit()
+    connection.close()
+    return report_id
+
+
+def get_leak_reports(limit=50):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT id, timestamp, name, contact, location, description,
+               image_filename, status, reporter_username, zone
+        FROM leak_reports
+        ORDER BY id DESC
+        LIMIT ?
+        """,
+        (limit,),
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    connection.close()
+    return rows
+
+
+def update_leak_report_status(report_id, status):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE leak_reports SET status=? WHERE id=?", (status, report_id))
+    changed = cursor.rowcount
+    connection.commit()
+    connection.close()
+    return changed
+
+
+def add_incident_event(report_id, timestamp, event, actor, details=""):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "INSERT INTO incident_events (report_id, timestamp, event, actor, details) VALUES (?, ?, ?, ?, ?)",
+        (report_id, timestamp, event, actor, details),
+    )
+    connection.commit()
+    connection.close()
+
+
+def get_incident_events(report_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT id, timestamp, event, actor, details FROM incident_events WHERE report_id=? ORDER BY id ASC",
+        (report_id,),
+    )
+    rows = [dict(row) for row in cursor.fetchall()]
+    connection.close()
+    return rows
+
+
+def get_user(username):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "SELECT id, username, password_hash, role FROM users WHERE username = ?",
+        (username,),
+    )
+    row = cursor.fetchone()
+    connection.close()
+    return dict(row) if row else None
+
+
+def create_user(username, password_hash, role):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+        (username, password_hash, role),
+    )
+    connection.commit()
+    connection.close()
